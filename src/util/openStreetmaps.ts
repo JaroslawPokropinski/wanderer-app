@@ -21,4 +21,15 @@ export const getStartingNodes = (lat: number, lng: number): Promise<unknown> => 
   );
 };
 
+export const getPath = (
+  flat: number,
+  flng: number,
+  tlat: number,
+  tlng: number,
+): Promise<{ coordinates: Array<[number, number]> }> => {
+  return Axios.get(
+    `http://www.yournavigation.org/api/1.0/gosmore.php?format=geojson&flat=${flat}&flon=${flng}&tlat=${tlat}&tlon=${tlng}&v=foot&fast=0&layer=mapnik`,
+  );
+};
+
 // TODO: Implement finding routes
