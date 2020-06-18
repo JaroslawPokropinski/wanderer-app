@@ -22,13 +22,13 @@ export const getStartingNodes = (lat: number, lng: number): Promise<unknown> => 
   );
 };
 
-type RoutingData = { coordinates: Array<[number, number]>; properties: { distance: string } };
+// type RoutingData = { coordinates: Array<[number, number]>; properties: { distance: string } };
 
-export const getPath = (flat: number, flng: number, tlat: number, tlng: number): Promise<RoutingData> => {
-  return Axios.get<RoutingData>(
-    `https://wandering-application.herokuapp.com/api/1.0/gosmore.php?format=geojson&flat=${flat}&flon=${flng}&tlat=${tlat}&tlon=${tlng}&fast=0&layer=mapnik`, // &v=foot
-  ).then((res) => res.data);
-};
+// export const getPath = (flat: number, flng: number, tlat: number, tlng: number): Promise<RoutingData> => {
+//   return Axios.get<RoutingData>(
+//     `https://wandering-application.herokuapp.com/api/1.0/gosmore.php?format=geojson&flat=${flat}&flon=${flng}&tlat=${tlat}&tlon=${tlng}&fast=0&layer=mapnik`, // &v=foot
+//   ).then((res) => res.data);
+// };
 
 export function measure(lat1: number, lon1: number, lat2: number, lon2: number) {
   // generally used geo measurement function
@@ -87,7 +87,6 @@ const addEdge = (nodes: Map<number, Node>, edge: Edge) => {
     n2.neighbours.push(edge);
   }
 };
-// TODO: set length properly
 
 const dist = (n1: Node, n2: Node) => {
   if (n1.lat == null || n1.lon == null || n2.lat == null || n2.lon == null) return 0;
@@ -148,7 +147,8 @@ export const createGraph = (lat: number, lon: number): Promise<{ nodes: Map<numb
     return { nodes, edges };
   });
 };
-// TODO: Implement finding routes
+
+// TODO: Improve finding routes
 export const findCycle = (
   start: number,
   graph: { nodes: Map<number, Node>; edges: Array<Edge> },
@@ -163,7 +163,6 @@ export const findCycle = (
     length = 0,
     arr: Array<number> = [],
   ): { nodeIds: Array<number>; length: number } | null => {
-    const stack = [];
     const node = labeledNodes.get(nodeId);
     if (node == null) return null;
 
@@ -192,16 +191,6 @@ export const findCycle = (
         }
       }
     }
-    // for (const n of node.neighbours) {
-    //   const neighID = n.nodes[0] !== nodeId ? n.nodes[0] : n.nodes[n.nodes.length - 1];
-    //   const neigh = labeledNodes.get(neighID);
-    //   if (neigh != null && n.length != null && !neigh.visited) {
-    //     const r = dfs(neighID, length + n.length, [...arr, neighID]);
-    //     if (r != null) {
-    //       return r;
-    //     }
-    //   }
-    // }
     return null;
   };
 

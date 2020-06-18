@@ -2,14 +2,8 @@ import './MapContainer.css';
 import React, { useState, useEffect } from 'react';
 import { Map, TileLayer, Marker, Polyline } from 'react-leaflet';
 import { LocationEvent } from 'leaflet';
-import { getGeolocation, getPath, createGraph, findCycle } from '../util/openStreetmaps';
+import { getGeolocation, createGraph, findCycle } from '../util/openStreetmaps';
 import { notEmpty } from '../util/arrayUtil';
-
-// const convertKmToAngles = (vec: [number, number], at: number): [number, number] => {
-//   const lat = vec[0] / 110.547;
-//   const lon = vec[1] / (111.32 * Math.cos(((at + lat) * Math.PI) / 180));
-//   return [lat, lon];
-// };
 
 function MapContainer() {
   const [state, setState] = useState({
@@ -71,12 +65,6 @@ function MapContainer() {
       {state.markers.map((m, i) => (
         <Marker key={i} position={m} />
       ))}
-      {/* {state.markers.map((m, i) => (
-        (i === 0)
-        ? null
-        : 
-      ))} */}
-      {/* {state.markers.length > 0 ? <Polyline positions={[...state.markers, state.markers[0]]} /> : null} */}
       <Polyline positions={state.path} />
     </Map>
   );
