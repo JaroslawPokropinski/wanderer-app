@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/wanderer-app/static/css/main.2c05c248.chunk.css",
-    "main.js": "/wanderer-app/static/js/main.40a0544d.chunk.js",
-    "main.js.map": "/wanderer-app/static/js/main.40a0544d.chunk.js.map",
+    "main.js": "/wanderer-app/static/js/main.22b6cfe7.chunk.js",
+    "main.js.map": "/wanderer-app/static/js/main.22b6cfe7.chunk.js.map",
     "runtime-main.js": "/wanderer-app/static/js/runtime-main.36254df8.js",
     "runtime-main.js.map": "/wanderer-app/static/js/runtime-main.36254df8.js.map",
-    "static/js/2.abd799b3.chunk.js": "/wanderer-app/static/js/2.abd799b3.chunk.js",
-    "static/js/2.abd799b3.chunk.js.map": "/wanderer-app/static/js/2.abd799b3.chunk.js.map",
+    "static/js/2.aee8006c.chunk.js": "/wanderer-app/static/js/2.aee8006c.chunk.js",
+    "static/js/2.aee8006c.chunk.js.map": "/wanderer-app/static/js/2.aee8006c.chunk.js.map",
     "index.html": "/wanderer-app/index.html",
-    "precache-manifest.ef3aa845f25de1483d0d88ee12cb7831.js": "/wanderer-app/precache-manifest.ef3aa845f25de1483d0d88ee12cb7831.js",
+    "precache-manifest.a2879bd7b429dda7b2dddb052e82245d.js": "/wanderer-app/precache-manifest.a2879bd7b429dda7b2dddb052e82245d.js",
     "service-worker.js": "/wanderer-app/service-worker.js",
     "static/css/main.2c05c248.chunk.css.map": "/wanderer-app/static/css/main.2c05c248.chunk.css.map",
-    "static/js/2.abd799b3.chunk.js.LICENSE.txt": "/wanderer-app/static/js/2.abd799b3.chunk.js.LICENSE.txt"
+    "static/js/2.aee8006c.chunk.js.LICENSE.txt": "/wanderer-app/static/js/2.aee8006c.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.36254df8.js",
-    "static/js/2.abd799b3.chunk.js",
+    "static/js/2.aee8006c.chunk.js",
     "static/css/main.2c05c248.chunk.css",
-    "static/js/main.40a0544d.chunk.js"
+    "static/js/main.22b6cfe7.chunk.js"
   ]
 }
