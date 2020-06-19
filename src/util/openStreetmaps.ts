@@ -185,7 +185,8 @@ export const findCycle = (
       const neighID = n.nodes[0] !== nodeId ? n.nodes[0] : n.nodes[n.nodes.length - 1];
       const neigh = labeledNodes.get(neighID);
       if (neigh != null && n.length != null && neigh.visited < 2) {
-        const r = dfs(neighID, length + n.length, [...arr, neighID]);
+        const edgeNodes = n.nodes[0] === nodeId ? n.nodes : n.nodes.reverse();
+        const r = dfs(neighID, length + n.length, [...arr, ...edgeNodes]);
         if (r != null) {
           return r;
         }
