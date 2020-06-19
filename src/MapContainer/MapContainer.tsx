@@ -1,9 +1,10 @@
-import './MapContainer.css';
 import React, { useState, useEffect } from 'react';
 import { Map, TileLayer, Marker, Polyline } from 'react-leaflet';
 import { LocationEvent } from 'leaflet';
 import { getGeolocation, createGraph, findCycle } from '../util/openStreetmaps';
 import { notEmpty } from '../util/arrayUtil';
+
+import './MapContainer.scss';
 
 function MapContainer() {
   const [state, setState] = useState({
