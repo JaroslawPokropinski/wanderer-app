@@ -1,8 +1,9 @@
-import './MapContainer.css';
 import React, { useState } from 'react';
 import { Map, TileLayer } from 'react-leaflet';
 import { LocationEvent } from 'leaflet';
 import { getGeolocation } from '../util/openStreetmaps';
+
+import './MapContainer.scss';
 
 function MapContainer() {
   const [state, setState] = useState({
