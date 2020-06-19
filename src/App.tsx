@@ -15,7 +15,6 @@ import './App.scss';
 
 function App() {
   const prefersDarkMode = !useMediaQuery('(prefers-color-scheme: light)');
-  console.log(prefersDarkMode);
 
   const theme = React.useMemo(
     () =>
@@ -28,7 +27,7 @@ function App() {
   );
 
   const history = useHistory();
-  const [value, setValue] = useState(history.location.pathname.substring(1));
+  const [value, setValue] = useState(history.location.pathname.substring(1) || 'map');
 
   return (
     <div className="app-root">
