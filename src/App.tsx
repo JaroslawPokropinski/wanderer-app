@@ -14,7 +14,7 @@ import { Restore, Favorite, LocationOn, Add, More } from '@material-ui/icons';
 import './App.scss';
 
 function App() {
-  const prefersDarkMode = !useMediaQuery('(prefers-color-scheme: light)');
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', { defaultMatches: true, noSsr: true });
 
   const theme = React.useMemo(
     () =>
