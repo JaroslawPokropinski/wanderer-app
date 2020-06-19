@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "a85b902dc1550e2bab1fc46805893f5d",
+    "revision": "24725164110bc2e2e8437bd2ca618ce0",
     "url": "/wanderer-app/index.html"
   },
   {
-    "revision": "e20e3db3982f5473aac8",
+    "revision": "a1cd699670125e4d43b1",
     "url": "/wanderer-app/static/css/main.2c05c248.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/wanderer-app/static/js/2.d16c2e34.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "e20e3db3982f5473aac8",
-    "url": "/wanderer-app/static/js/main.05a4ad69.chunk.js"
+    "revision": "a1cd699670125e4d43b1",
+    "url": "/wanderer-app/static/js/main.dfbcb07b.chunk.js"
   },
   {
     "revision": "cad5dfe788cee925de3f",
