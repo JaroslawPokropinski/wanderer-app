@@ -50,7 +50,7 @@ function App() {
           <BottomNavigation
             value={value}
             onChange={(event, newValue) => {
-              history.push(`/${newValue}`);
+              history.replace(`/${newValue}`);
               setValue(newValue);
             }}
           >
