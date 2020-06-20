@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/wanderer-app/static/css/main.b55db8ee.chunk.css",
-    "main.js": "/wanderer-app/static/js/main.22b6cfe7.chunk.js",
-    "main.js.map": "/wanderer-app/static/js/main.22b6cfe7.chunk.js.map",
+    "main.js": "/wanderer-app/static/js/main.6cbab9b5.chunk.js",
+    "main.js.map": "/wanderer-app/static/js/main.6cbab9b5.chunk.js.map",
     "runtime-main.js": "/wanderer-app/static/js/runtime-main.36254df8.js",
     "runtime-main.js.map": "/wanderer-app/static/js/runtime-main.36254df8.js.map",
     "static/js/2.aee8006c.chunk.js": "/wanderer-app/static/js/2.aee8006c.chunk.js",
     "static/js/2.aee8006c.chunk.js.map": "/wanderer-app/static/js/2.aee8006c.chunk.js.map",
     "index.html": "/wanderer-app/index.html",
-    "precache-manifest.21ae5290202db32ecc4f86caf2ca954f.js": "/wanderer-app/precache-manifest.21ae5290202db32ecc4f86caf2ca954f.js",
+    "precache-manifest.47e2095bcd0fb8cd9667985feba936a0.js": "/wanderer-app/precache-manifest.47e2095bcd0fb8cd9667985feba936a0.js",
     "service-worker.js": "/wanderer-app/service-worker.js",
     "static/css/main.b55db8ee.chunk.css.map": "/wanderer-app/static/css/main.b55db8ee.chunk.css.map",
     "static/js/2.aee8006c.chunk.js.LICENSE.txt": "/wanderer-app/static/js/2.aee8006c.chunk.js.LICENSE.txt"
@@ -17,6 +17,6 @@
     "static/js/runtime-main.36254df8.js",
     "static/js/2.aee8006c.chunk.js",
     "static/css/main.b55db8ee.chunk.css",
-    "static/js/main.22b6cfe7.chunk.js"
+    "static/js/main.6cbab9b5.chunk.js"
   ]
 }
