@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Map, TileLayer, Marker, Polyline } from 'react-leaflet';
 import { LocationEvent } from 'leaflet';
-import { getGeolocation, createGraph, findCycle } from '../util/openStreetmaps';
-import { notEmpty } from '../util/arrayUtil';
+import { getGeolocation, createGraph, toGraph } from '../util/openStreetmaps';
+import { observer } from 'mobx-react';
+import { useStores } from '../stores';
 
 import './MapContainer.scss';
+import { findCycle, getClosestNode } from '../util/graph';
 
-function MapContainer() {
+const MapContainer = observer(() => {
+  const { routeStore } = useStores();
   const [state, setState] = useState({
     lat: 0,
     lng: 0,
@@ -18,9 +21,13 @@ function MapContainer() {
   const position = { lat: state.lat, lng: state.lng };
 
   useEffect(() => {
+    routeStore.isGenerated = false;
+    let latitude = 0;
+    let longitude = 0;
     getGeolocation()
       .then((position) => {
-        const { latitude, longitude } = position.coords;
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
         setState((state) => ({
           ...state,
           lat: latitude,
@@ -30,20 +37,23 @@ function MapContainer() {
         return createGraph(latitude, longitude);
       })
       .then((g) => {
-        console.log(g);
-        const cycle = findCycle(g.edges[0].nodes[0], g, 2.0, 2.5);
-        console.log(cycle?.length);
-        const path =
-          cycle?.nodeIds
-            .map((v) => g.nodes.get(v))
-            .filter(notEmpty)
-            .map((v) => (v.lat != null && v.lon != null ? ([v.lat, v.lon] as [number, number]) : null))
-            .filter(notEmpty) ?? [];
+        const graph = toGraph(g);
+        const startingNode = graph.edges[0].nodes[0];
+        // const startingNode = getClosestNode(graph, latitude, longitude);
+
+        return findCycle(startingNode, graph, 5.0, 10.0);
+      })
+      .then((cycle) => {
+        console.log(cycle);
+        const path = cycle?.nodes.map((v) => [v.lat, v.lon] as [number, number]) ?? [];
 
         setState((state) => ({
           ...state,
+          lat: cycle?.center.lat ?? state.lat,
+          lng: cycle?.center.lon ?? state.lng,
           path,
         }));
+        routeStore.isGenerated = true;
       })
       .catch(() => null); // Silently ignore
   }, []);
@@ -69,6 +79,6 @@ function MapContainer() {
       <Polyline positions={state.path} />
     </Map>
   );
-}
+});
 
 export default MapContainer;

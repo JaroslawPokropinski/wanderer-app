@@ -1,5 +1,6 @@
 import Axios from 'axios';
-import { iterate } from './arrayUtil';
+import { iterate, notEmpty } from './arrayUtil';
+import { Graph, Node } from './graph';
 
 export const getGeolocation = (): Promise<Position> => {
   return new Promise<Position>((resolve, reject) => {
@@ -22,14 +23,6 @@ export const getStartingNodes = (lat: number, lng: number): Promise<unknown> => 
   );
 };
 
-// type RoutingData = { coordinates: Array<[number, number]>; properties: { distance: string } };
-
-// export const getPath = (flat: number, flng: number, tlat: number, tlng: number): Promise<RoutingData> => {
-//   return Axios.get<RoutingData>(
-//     `https://wandering-application.herokuapp.com/api/1.0/gosmore.php?format=geojson&flat=${flat}&flon=${flng}&tlat=${tlat}&tlon=${tlng}&fast=0&layer=mapnik`, // &v=foot
-//   ).then((res) => res.data);
-// };
-
 export function measure(lat1: number, lon1: number, lat2: number, lon2: number) {
   // generally used geo measurement function
   const R = 6378.137; // Radius of earth in KM
@@ -43,12 +36,12 @@ export function measure(lat1: number, lon1: number, lat2: number, lon2: number) 
   return d; // kilometers
 }
 
-type Node = {
+type MapNode = {
   type: 'node';
   id?: number;
   lat?: number;
   lon?: number;
-  neighbours: Array<Edge>;
+  neighbours: Array<MapEdge>;
 };
 
 type MapWay = {
@@ -58,7 +51,7 @@ type MapWay = {
 };
 
 type MapElement =
-  | Node
+  | MapNode
   | MapWay
   | {
       type: 'relation';
@@ -68,12 +61,12 @@ type MapData = {
   elements: Array<MapElement>;
 };
 
-type Edge = {
+type MapEdge = {
   length: number;
   nodes: Array<number>;
 };
 
-const addEdge = (nodes: Map<number, Node>, edge: Edge) => {
+const addMapEdge = (nodes: Map<number, MapNode>, edge: MapEdge) => {
   const start = edge.nodes[0];
   const finish = edge.nodes[edge.nodes.length - 1];
 
@@ -88,44 +81,52 @@ const addEdge = (nodes: Map<number, Node>, edge: Edge) => {
   }
 };
 
-const dist = (n1: Node, n2: Node) => {
+const dist = (n1: MapNode, n2: MapNode) => {
   if (n1.lat == null || n1.lon == null || n2.lat == null || n2.lon == null) return 0;
 
   return measure(n1.lat, n1.lon, n2.lat, n2.lon);
 };
 
-const splitEdge = (way: MapWay, nodes: Map<number, Node>, linkMap: Map<number, number>, start = 0): Array<Edge> => {
+const splitMapEdge = (
+  way: MapWay,
+  nodes: Map<number, MapNode>,
+  linkMap: Map<number, number>,
+  start = 0,
+): Array<MapEdge> => {
   if (way.nodes == null) return [];
   let lengthSum = 0;
-  let prevNode: Node | null = nodes.get(way.nodes[start]) ?? null;
+  let prevNode: MapNode | null = nodes.get(way.nodes[start]) ?? null;
 
   for (let i = start + 1; i < way.nodes.length - 1; i++) {
     const linkCount = linkMap.get(way.nodes[i]);
-    const currNode: Node | null = nodes.get(way.nodes[i]) ?? null;
+    const currNode: MapNode | null = nodes.get(way.nodes[i]) ?? null;
     if (prevNode != null && currNode != null) {
-      lengthSum += dist(prevNode, currNode);
+      lengthSum += dist(prevNode, currNode) + 0.001;
     }
     prevNode = currNode;
 
     if (linkCount != null && linkCount > 1) {
       const edge = { nodes: way.nodes.slice(start, i + 1), length: lengthSum };
-      addEdge(nodes, edge);
-      return [edge, ...splitEdge(way, nodes, linkMap, i)];
+      addMapEdge(nodes, edge);
+      return [edge, ...splitMapEdge(way, nodes, linkMap, i)];
     }
   }
   const edge = { nodes: way.nodes.slice(start), length: lengthSum };
-  addEdge(nodes, edge);
+  addMapEdge(nodes, edge);
   return [edge];
 };
 
-export const createGraph = (lat: number, lon: number): Promise<{ nodes: Map<number, Node>; edges: Array<Edge> }> => {
+export const createGraph = (
+  lat: number,
+  lon: number,
+): Promise<{ nodes: Map<number, MapNode>; edges: Array<MapEdge> }> => {
   const radius = 0.005;
   return Axios.get<MapData>(
     `https://www.openstreetmap.org/api/0.6/map?bbox=${lon - radius},${lat - radius},${lon + radius},${lat + radius}`,
   ).then((res) => {
     const elements = res.data.elements;
     const nodeLinkMap = new Map<number, number>();
-    const nodes = new Map<number, Node>();
+    const nodes = new Map<number, MapNode>();
     elements.forEach((v) => {
       if (v.type === 'way' && v.nodes != null) {
         v.nodes.forEach((node) => {
@@ -138,10 +139,10 @@ export const createGraph = (lat: number, lon: number): Promise<{ nodes: Map<numb
       }
     });
 
-    const edges: Array<Edge> = [];
+    const edges: Array<MapEdge> = [];
     elements.forEach((v) => {
       if (v.type === 'way' && v.nodes != null) {
-        splitEdge(v, nodes, nodeLinkMap).forEach((e) => edges.push(e));
+        splitMapEdge(v, nodes, nodeLinkMap).forEach((e) => edges.push(e));
       }
     });
     return { nodes, edges };
@@ -151,11 +152,11 @@ export const createGraph = (lat: number, lon: number): Promise<{ nodes: Map<numb
 // TODO: Improve finding routes
 export const findCycle = (
   start: number,
-  graph: { nodes: Map<number, Node>; edges: Array<Edge> },
+  graph: { nodes: Map<number, MapNode>; edges: Array<MapEdge> },
   minLength = 0,
   maxLength = 10,
 ) => {
-  const labeledNodes = new Map<number, Node & { visited: number }>();
+  const labeledNodes = new Map<number, MapNode & { visited: number }>();
   graph.nodes.forEach((v, k) => labeledNodes.set(k, { ...v, visited: 0 }));
 
   const dfs = (
@@ -196,4 +197,24 @@ export const findCycle = (
   };
 
   return dfs(start);
+};
+
+export const toGraph = (g: { nodes: Map<number, MapNode>; edges: Array<MapEdge> }) => {
+  const graph = new Graph();
+  const newNodesMap = new Map<number, Node>();
+  graph.nodes = [];
+  g.nodes.forEach((v) => {
+    if (v.id == null || v.lat == null || v.lon == null) return null;
+    const n = graph.addNode(v.id, v.lat, v.lon);
+    newNodesMap.set(n.id, n);
+  });
+
+  g.edges.forEach((e) => graph.addEdge(e.nodes.map((n) => newNodesMap.get(n)).filter(notEmpty), e.length));
+
+  // Set neighbours
+  graph.edges.forEach((e) => {
+    e.nodes[0].addEdge(e);
+    e.nodes[e.nodes.length - 1].addEdge(e);
+  });
+  return graph;
 };
