@@ -30,7 +30,7 @@ function MapContainer() {
       })
       .then((g) => {
         console.log(g);
-        const cycle = findCycle(g.edges[0].nodes[0], g, 2.0, 2.5);
+        const cycle = findCycle(g.edges[0].nodes[0], g, 2.0, 10.);
         console.log(cycle?.length);
         const path =
           cycle?.nodeIds

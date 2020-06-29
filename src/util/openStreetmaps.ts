@@ -61,8 +61,8 @@ type MapElement =
   | Node
   | MapWay
   | {
-      type: 'relation';
-    };
+    type: 'relation';
+  };
 
 type MapData = {
   elements: Array<MapElement>;
@@ -155,44 +155,178 @@ export const findCycle = (
   minLength = 0,
   maxLength = 10,
 ) => {
-  const labeledNodes = new Map<number, Node & { visited: number }>();
-  graph.nodes.forEach((v, k) => labeledNodes.set(k, { ...v, visited: 0 }));
 
-  const dfs = (
-    nodeId: number,
-    length = 0,
-    arr: Array<number> = [],
-  ): { nodeIds: Array<number>; length: number } | null => {
-    const node = labeledNodes.get(nodeId);
-    if (node == null) return null;
+  return getRandomPath(start, graph, maxLength)
+};
 
-    node.visited += 1;
+const A_star = (start: number, end: number, graph: { nodes: Map<number, Node>; edges: Array<Edge> }) => {
+  const startNode_: Node | undefined = graph.nodes.get(start)
+  if (startNode_ == undefined) {
+    throw new Error()
+  }
+  const startNode = startNode_
+  const h = (node: number) => dist(graph.nodes.get(node) ?? startNode, startNode)
+  const openSet = new Set<number>()
+  openSet.add(start)
+  const cameFrom = new Map<number, number>()
+  const gScore = new Map<number, number>()
+  gScore.set(start, 0)
+  const fScore = new Map<number, number>()
+  fScore.set(start, h(start))
 
-    if (
-      length > minLength &&
-      node.neighbours.map((n) => (n.nodes[0] !== nodeId ? n.nodes[0] : n.nodes[n.nodes.length - 1])).indexOf(start) !==
-        -1
-    ) {
-      return { nodeIds: arr, length };
+  const getCurrent = () => {
+    let best: number = openSet.values().next().value
+    let bestScore = Infinity
+    openSet.forEach((node) => {
+      if (fScore.get(node) ?? Infinity < bestScore) {
+        bestScore = fScore.get(node) ?? Infinity
+        best = node
+      }
+    })
+    return best
+  }
+
+  const reconstructPath = (last: number) => {
+    const path = [last]
+    let current = last
+    while (cameFrom.has(current)) {
+      current = cameFrom.get(current) ?? 0
+      path.unshift(current)
+    }
+    return path
+  }
+
+  while (openSet.size > 0) {
+    const current: number = getCurrent()
+    const currentNode = graph.nodes.get(current)
+    openSet.delete(current)
+    if (current === end) {
+      const path = reconstructPath(current)
+      let length: number = 0
+      for (let i = 0; i < path.length - 1; i++) {
+        const node1 = graph.nodes.get(path[i])
+        const node2 = graph.nodes.get(path[i + 1])
+        if (node1 === undefined || node2 === undefined) {
+          throw new Error()
+        }
+        length += dist(node1, node2)
+      }
+      return { path: path, length: length }
     }
 
-    if (length > maxLength) return null;
-
-    const riter = iterate(node.neighbours);
-
-    for (let next = riter(); next != null; next = riter()) {
-      const n = next;
-      const neighID = n.nodes[0] !== nodeId ? n.nodes[0] : n.nodes[n.nodes.length - 1];
-      const neigh = labeledNodes.get(neighID);
-      if (neigh != null && n.length != null && neigh.visited < 2) {
-        const r = dfs(neighID, length + n.length, [...arr, neighID]);
-        if (r != null) {
-          return r;
+    for (let edge of graph.nodes.get(current)?.neighbours ?? []) {
+      const neighbor = edge.nodes[0] !== current ? edge.nodes[0] : edge.nodes[edge.nodes.length - 1]
+      if (neighbor === undefined) {
+        throw new Error()
+      }
+      const tentative_gScore = gScore.get(current) ?? Infinity + edge.length
+      const neighborScore = gScore.get(neighbor) ?? Infinity
+      if (tentative_gScore < neighborScore) {
+        cameFrom.set(neighbor, current)
+        gScore.set(neighbor, tentative_gScore)
+        fScore.set(neighbor, tentative_gScore + h(neighbor))
+        if (!openSet.has(neighbor)) {
+          openSet.add(neighbor)
         }
       }
     }
-    return null;
-  };
 
-  return dfs(start);
+  }
+  return { path: [], length: Infinity }
+}
+
+const getRandomPath = (
+  start: number,
+  graph: { nodes: Map<number, Node>; edges: Array<Edge> },
+  length = 10,
+) => {
+
+  // const g1 = {nodes: new Map<number, Node>(), edges: Array<Edge>() }
+  // g1.edges.push({length:1, nodes:[0,1]}) //0
+  // g1.edges.push({length:1, nodes:[0,2]})//1
+  // g1.edges.push({length:1, nodes:[2,1]})//2
+  // g1.edges.push({length:1, nodes:[2, 3]})//3
+  // g1.edges.push({length:1, nodes:[3,4]})//4
+  // g1.edges.push({length:1, nodes:[4,5]})//5
+  // g1.edges.push({length:1, nodes:[6,5]})//6
+  // g1.edges.push({length:1, nodes:[3, 7]})//7
+  // g1.edges.push({length:1, nodes:[8, 9]})//8
+  // g1.edges.push({length:1, nodes:[8, 7]})//9
+  // g1.edges.push({length:1, nodes:[9, 7]})//9
+
+  // g1.nodes.set(0, {lat: 432, lon: 249, type: 'node', neighbours: [g1.edges[0], g1.edges[1]]})
+  // g1.nodes.set(1, {lat: 546, lon: 71, type: 'node', neighbours: [g1.edges[0], g1.edges[2]]})
+  // g1.nodes.set(2, {lat: 645, lon: 250, type: 'node', neighbours: [g1.edges[1], g1.edges[2], g1.edges[3]]})
+  // g1.nodes.set(3, {lat: 885, lon: 305, type: 'node', neighbours: [g1.edges[3], g1.edges[4]]})
+  // g1.nodes.set(4, {lat: 983, lon: 655, type: 'node', neighbours: [g1.edges[5], g1.edges[4]]})
+  // g1.nodes.set(5, {lat: 583, lon: 516, type: 'node', neighbours: [g1.edges[5], g1.edges[6]]})
+
+  // g1.nodes.set(6, {lat: 429, lon: 756, type: 'node', neighbours: [g1.edges[6]]})
+  // g1.nodes.set(7, {lat: 1301, lon: 442, type: 'node', neighbours: [g1.edges[7], g1.edges[9]]})
+  // g1.nodes.set(8, {lat: 1557, lon: 304, type: 'node', neighbours: [g1.edges[8], g1.edges[9]]})
+  // g1.nodes.set(9, {lat: 1449, lon: 676, type: 'node', neighbours: [g1.edges[8], g1.edges[10]]})
+
+  // const {path:p, length:l} = A_star(8, 6, g1)
+  // console.log([p, l])
+
+  // console.log(graph.edges[0].length)
+  // console.log(dist(graph.nodes.get(graph.edges[0].nodes[0]), graph.nodes.get(graph.edges[0].nodes[graph.edges[0].nodes.length-1])))
+
+  let currentLength = 0
+  const path = [start]
+  let current = start
+  const startNode = graph.nodes.get(start)
+  if(startNode===undefined){
+    throw new Error()
+  }
+  const getProba = (dist: number) => {
+    if ((currentLength + dist) >= length) {
+      return 1
+    }
+    return 1 - Math.exp(-2 * (currentLength + dist) / length)
+  }
+  while (true) {
+    
+    let newNode = null
+    // const proba = getProba(l)
+    const proba = 0
+    const d = graph.nodes.get(current) ?? startNode
+    if (currentLength + dist(d, startNode) >= length) {
+      break
+    }
+    if (Math.random() < proba) {
+      const { path: p, length: l } = A_star(current, start, graph)
+      newNode = p[1]
+    } else {
+      const neighbours = graph.nodes.get(current)?.neighbours
+      if (neighbours === undefined) {
+        throw new Error()
+      }
+      const numberOfNeighbours = neighbours?.length ?? 0
+      const n = Math.floor(Math.random() * numberOfNeighbours)
+      newNode = neighbours[n].nodes[0] !== current ? neighbours[n].nodes[0] : neighbours[n].nodes[neighbours[n].nodes.length - 1]
+    }
+    // console.log(currentLength)
+    // console.log(newNode)
+    // console.log(proba)
+
+    path.push(newNode)
+    const node1 = graph.nodes.get(newNode)
+    const node2 = graph.nodes.get(path[path.length - 2])
+    if (node1 === undefined || node2 === undefined) {
+      throw new Error()
+    }
+    currentLength += dist(node1, node2) + 0.001
+    if (newNode === start && currentLength >= length) {
+      break
+    }
+    current = newNode
+  }
+  const last = path[path.length-1]
+  if(last!==start) {
+    const { path: p, length: l } = A_star(last, start, graph)
+    path.push(...p)
+  }
+
+  return { nodeIds: path, length: currentLength }
 };
